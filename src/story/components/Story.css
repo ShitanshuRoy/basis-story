@@ -1,6 +1,6 @@
 .Story-base {
   width: 100%;
-  height: 600px;
-  background: #666;
+  height: auto;
+  text-align: left;
   user-select: none;
 }
