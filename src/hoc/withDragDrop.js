@@ -12,7 +12,7 @@ export default function withDragDrop(Component) {
       };
     }
     handleMouseMove(event) {
-      const mouseCoordinates = { x: event.pageX, y: event.pageY };
+      const mouseCoordinates = { x: event.page.X, y: event.page.Y };
       this.setState({ mouseCoordinates });
     }
     handleMouseLeave() {
