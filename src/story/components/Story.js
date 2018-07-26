@@ -1,224 +1,253 @@
 import React from "react";
-import Draggable from "./Draggable";
-import withDragDrop from "../../hoc/withDragDrop";
-import "./Story.css";
-const data = [
-  { colour: "#111", in: 0 },
-  { colour: "#333", in: 1 },
-  { colour: "#555", in: 2 },
-  { colour: "#777", in: 3 },
-  { colour: "#999", in: 4 },
-  { colour: "#bbb", in: 5 },
-  { colour: "#333", in: 6 },
-  { colour: "#555", in: 7 },
-  { colour: "#777", in: 8 },
-  { colour: "#999", in: 9 },
-  { colour: "#bbb", in: 10 }
-];
-const EDGE = 50;
-const Story = class Story extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      boardCoordinates: {},
-      mouseCoordinates: {},
-      dragging: false,
-      data: data,
-      currentDragged: null,
-      draggedIndex: null,
-      onDropElement: null
-    };
-    this.offsets = [];
-  }
-  updateOffset(offset) {
-    this.offsets.push(offset);
-  }
-  componentDidMount() {
-    const boardCoordinates = {
-      top: this.storyDiv.offsetTop,
-      bottom: this.storyDiv.offsetHeight + this.storyDiv.offsetTop,
-      left: this.storyDiv.offsetLeft,
-      right: this.storyDiv.offsetWidth + this.storyDiv.offsetLeft
-    };
-    this.setState({ boardCoordinates });
-  }
-  getDraggedItem(i) {
-    console.log(i);
-    this.setState({ currentDragged: i });
-  }
-  swapPositions(pos1, pos2) {
-    let data = this.state.data;
-    let temp = this.state.data[pos1];
-    data[pos1] = this.state.data[pos2];
-    data[pos2] = temp;
-    this.setState({ data, draggedIndex: null });
-  }
-  handleMouseDown(e) {
-    this.props.onMouseDown(e);
-    this.offsets.forEach((offset, i) => {
-      if (
-        this.props.mouseCoordinates.x > offset.left &&
-        this.props.mouseCoordinates.x < offset.right &&
-        this.props.mouseCoordinates.y > offset.top &&
-        this.props.mouseCoordinates.y < offset.bottom
-      ) {
-        if (this.state.draggedIndex !== i) this.setState({ draggedIndex: i });
-        else this.setState({ draggedIndex: null });
-      }
-    });
-  }
-  handleMouseUp() {
-    this.props.onMouseUp();
-    this.offsets.forEach((offset, i) => {
-      if (
-        this.props.mouseCoordinates.x > offset.left &&
-        this.props.mouseCoordinates.x < offset.right &&
-        this.props.mouseCoordinates.y > offset.top &&
-        this.props.mouseCoordinates.y < offset.bottom
-      ) {
-        this.swapPositions(i, this.state.draggedIndex);
-      } else {
-        this.setState({ draggedIndex: null });
-      }
-    });
-    console.log(this.state.data);
-  }
-
-  render() {
-    //console.log(this.props.mouseCoordinates);
-    let data = this.state.data;
-    let dropIndex = null;
-    let left = false;
-    let right = false;
-    let top = false;
-    let bottom = false;
-    let swap = false;
-    let draggedOver = null;
-    if (this.props.dragging) {
-      this.offsets.forEach((offset, i) => {
-        if (
-          this.props.mouseCoordinates.x > offset.left &&
-          this.props.mouseCoordinates.x < offset.right &&
-          this.props.mouseCoordinates.y > offset.top &&
-          this.props.mouseCoordinates.y < offset.bottom
-        ) {
-          console.log(`Over:${i}`);
-
-          draggedOver = i;
-          // data[i] = this.state.data[i === 0 ? 1 : 0];
-          // data[i === 0 ? 1 : 0] = this.state.data[i];
-          if (
-            this.props.mouseCoordinates.x > offset.left &&
-            this.props.mouseCoordinates.x < offset.left + EDGE
-          ) {
-            console.log("left edge");
-            left = true;
-            right = false;
-            top = false;
-            bottom = false;
-          } else if (
-            this.props.mouseCoordinates.x > offset.right - EDGE &&
-            this.props.mouseCoordinates.x < offset.right
-          ) {
-            console.log("right edge");
-            right = true;
-            left = false;
-            top = false;
-            bottom = false;
-          } else if (
-            this.props.mouseCoordinates.y > offset.top &&
-            this.props.mouseCoordinates.y < offset.top + EDGE
-          ) {
-            top = true;
-            left = false;
-            right = false;
-            bottom = false;
-          } else if (
-            this.props.mouseCoordinates.y > offset.bottom - EDGE &&
-            this.props.mouseCoordinates.y < offset.bottom
-          ) {
-            bottom = true;
-            left = false;
-            right = false;
-            top = false;
-
-            console.log("bottom edge");
-          }
-          // else {
-          //   console.log("swap");
-          //   left = false;
-          //   right = false;
-          //   top = false;
-          //   bottom = false;
-          //   swap = true;
-          // }
-        }
-      });
-    } else {
-      dropIndex = null;
+import ReactDOM from "react-dom";
+import DragDropMouse from "./DragDropMouse";
+import { Draggable } from "./DragDropMouse";
+import ForcedLayout from "./ForcedLayout";
+import { Image } from "xelpmoc-core";
+import { ResizableItem, ResizableColumn } from "./ForcedLayout";
+export default class Story extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            data: this.props.data,
+            pickItem: null,
+            updater: false
+        };
+        this.pickColumn = null;
+        this.pickItem = null;
     }
+    getNestedIndex = (index, data) => {
+        let flatIndex = index;
+        let nestedIndex = 0;
+        let mainIndex = 0;
 
-    return (
-      <div
-        className="Story-base"
-        ref={div => {
-          this.storyDiv = div;
-        }}
-        onMouseMove={e => this.props.onMouseMove(e)}
-        onMouseLeave={() => this.props.onMouseLeave()}
-        onMouseDown={e => this.handleMouseDown(e)}
-        onMouseUp={() => this.handleMouseUp()}
-      >
-        {this.state.data.map((data, i) => {
-          return (
-            <Draggable
-              index={i}
-              key={i}
-              updateOffset={offset => this.updateOffset(offset)}
-              mouseCoordinates={this.props.mouseCoordinates}
-              dragging={this.props.dragging}
-              dropLeft={left}
-              dropTop={top}
-              dropRight={right}
-              dropBottom={bottom}
-              // getDraggedItem={i => this.getDraggedItem(i)}
-              dragged={i === this.state.draggedIndex}
-              draggedOver={i === draggedOver}
-              swapPositions={(val1, val2) => {
-                this.swapPositions(val1, val2);
-              }}
-            >
-              <div
-                style={{
-                  width: "100%",
-                  height: 200,
-                  backgroundColor: data.colour,
-                  padding: 40
-                }}
-              >
-                {data.in}
-                {i === this.state.draggedIndex ? "Faded" : ""}
-              </div>
-            </Draggable>
-          );
-        })}
-      </div>
-    );
-  }
-};
+        let counter = 0;
+        while (counter < data.length) {
+            if (data[counter].length <= flatIndex) {
+                mainIndex = mainIndex + 1;
+                flatIndex = flatIndex - data[counter].length;
+            } else {
+                nestedIndex = flatIndex;
+            }
+            counter++;
+        }
+        console.log(data);
+        console.log("index", index);
+        console.log("mainindex", mainIndex);
+        console.log("nested index", nestedIndex);
+        return { columnIndex: mainIndex, itemIndex: nestedIndex };
+    };
+    getNestedItem = (index, data) => {
+        const itemIndex = this.getNestedIndex(index, data);
 
-export default withDragDrop(Story);
+        if (data[itemIndex.columnIndex][itemIndex.itemIndex])
+            return data[itemIndex.columnIndex][itemIndex.itemIndex];
+        else {
+            console.log(index);
+            console.log(itemIndex);
+            console.log("item not found");
+            //return null;
+            return data[itemIndex.columnIndex][itemIndex.itemIndex - 1];
+        }
+    };
+    onDrag = val => {
+        console.log(val);
+    };
+    // handleDrop = (group, column, item) => {
+    //     let data = this.state.data.slice();
+    //     if (this.pickColumn !== null && this.pickItem !== null) {
+    //         console.log(this.state.data);
+    //         const pickedUpItem = data[this.pickColumn][this.pickItem];
+    //         console.log(pickedUpItem);
+    //         console.log(data);
 
-{
-  /* <div className="Story-draggable">
-          x:{this.props.draggedCoordinates.x} y:{
-            this.props.draggedCoordinates.y
-          }
-        </div>
-        <div className="Story-draggable">
-          x:{this.props.mouseCoordinates.x} y:{this.props.mouseCoordinates.y}
-        </div>
-        <div className="Story-draggable">
-          x:{this.props.dropCoordinates.x} y:{this.props.dropCoordinates.y}
-        </div> */
+    //         data[this.pickColumn].splice(this.pickItem, 1);
+    //         //  Object.assign([], data, { [this.pickColumn]: pickedUpItem });
+    //         console.log(column, item);
+    //         data[column].splice(item + 1, 0, pickedUpItem);
+    //         console.log(data);
+    //         this.setState({ data, dropX: null, dropY: null });
+    //         // this.setState({ data });
+    //     }
+    // };
+    onPick = index => {
+        let flatIndex = 0;
+
+        this.setState({ pickIndex: index });
+    };
+    onDrop = (index, direction, axis) => {
+        let data = JSON.parse(JSON.stringify(this.state.data));
+        //  this.setState({ dropItem: index });
+        console.log(direction);
+        let flatIndex = 0;
+        const droppedOnIndex = this.getNestedIndex(index, data);
+        const pickedUpIndex = this.getNestedIndex(this.state.pickIndex, data);
+        const droppedOnItem = this.getNestedItem(index, data);
+        const pickedUpItem = this.getNestedItem(this.state.pickIndex, data);
+
+        // console.log(this.state.pickIndex);
+        // console.log(pickedUpIndex);
+        // console.log(droppedOnIndex);
+        // console.log(index);
+
+        if (direction === "INSIDE") {
+            if (
+                pickedUpItem &&
+                droppedOnItem &&
+                pickedUpItem !== undefined &&
+                droppedOnItem !== undefined
+            ) {
+                data[droppedOnIndex.columnIndex][
+                    droppedOnIndex.itemIndex
+                ] = pickedUpItem;
+                data[pickedUpIndex.columnIndex][
+                    pickedUpIndex.itemIndex
+                ] = droppedOnItem;
+                this.setState({ data, updater: !this.state.updater }, () => {
+                    this.forceUpdate();
+                });
+            }
+        } else {
+            if (axis === "Y") {
+                console.log(droppedOnItem);
+                console.log(pickedUpItem);
+                const normaliser = direction === "END" ? 1 : 0;
+                // console.log("drop column", droppedOnIndex.columnIndex);
+                // console.log(
+                //     "drop item",
+                //     droppedOnIndex.itemIndex + normaliser >= 0
+                //         ? droppedOnIndex.itemIndex + normaliser
+                //         : 0
+                // );
+                // console.log("pick column", pickedUpIndex.columnIndex);
+                // console.log("pick item", pickedUpIndex.itemIndex);
+                data[droppedOnIndex.columnIndex].splice(
+                    droppedOnIndex.itemIndex + normaliser >= 0
+                        ? droppedOnIndex.itemIndex + normaliser
+                        : 0,
+                    0,
+                    pickedUpItem
+                );
+                data[pickedUpIndex.columnIndex].splice(
+                    pickedUpIndex.itemIndex,
+                    1
+                );
+                this.setState({ data, updater: !this.state.updater }, () => {
+                    this.forceUpdate();
+                });
+            } else if (axis === "X") {
+                const normaliser = direction === "END" ? 1 : 0;
+
+                data.splice(
+                    droppedOnIndex.columnIndex + normaliser >= 0
+                        ? droppedOnIndex.columnIndex + normaliser
+                        : 0,
+                    0,
+                    [pickedUpItem]
+                );
+                data[pickedUpIndex.columnIndex].splice(
+                    pickedUpIndex.itemIndex,
+                    1
+                );
+                console.log(data);
+                this.setState({ data, updater: !this.state.updater }, () => {
+                    this.forceUpdate();
+                });
+                console.log("X");
+            }
+        }
+    };
+
+    render() {
+        const ratios = this.state.data.map(item => {
+            return item
+                .map(val => {
+                    if (val) return 1 / val.ratio;
+                    else return 1;
+                })
+                .reduce((prev, next) => {
+                    return prev + next;
+                }, 0);
+        });
+
+        const normaliser = ratios.reduce((prev, next) => {
+            return prev + 1 / next;
+        }, 0);
+
+        return (
+            <DragDropMouse
+                updater={this.state.updater}
+                onPick={this.onPick}
+                onDrag={this.onDrag}
+                onDrop={this.onDrop}
+                render={dragDropMouse => (
+                    <ForcedLayout updater={this.state.updater}>
+                        {this.state.data.map((val, index) => {
+                            return (
+                                <ResizableColumn
+                                    index={index}
+                                    normaliser={normaliser}
+                                    ratio={ratios[index]}
+                                >
+                                    {val.map((value, i) => {
+                                        return (
+                                            <Draggable
+                                                {...value}
+                                                index={
+                                                    index === 0
+                                                        ? i
+                                                        : this.state.data
+                                                              .slice(0, [index])
+                                                              .reduce(
+                                                                  (
+                                                                      acc,
+                                                                      curr
+                                                                  ) => {
+                                                                      return (
+                                                                          acc +
+                                                                          curr.length
+                                                                      );
+                                                                  },
+                                                                  0
+                                                              ) + i
+                                                }
+                                                onPickUp={this.handlePick}
+                                            >
+                                                {() => {
+                                                    return (
+                                                        <div
+                                                            style={{
+                                                                width: "100%",
+                                                                height: "100%"
+
+                                                                // backgroundImage: `url(${
+                                                                //     value.image
+                                                                // })`,
+                                                                // backgroundPosition:
+                                                                //     "center",
+                                                                // backgroundSize:
+                                                                //     "cover"
+                                                            }}
+                                                        >
+                                                            <Image
+                                                                image={
+                                                                    value
+                                                                        ? value.image
+                                                                        : ""
+                                                                }
+                                                            />
+                                                        </div>
+                                                    );
+                                                }}
+                                            </Draggable>
+                                        );
+                                    })}
+                                </ResizableColumn>
+                            );
+                        })}
+                    </ForcedLayout>
+                )}
+            />
+        );
+    }
 }
