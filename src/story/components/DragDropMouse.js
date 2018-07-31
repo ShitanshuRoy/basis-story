@@ -247,6 +247,7 @@ export class Draggable extends React.Component {
 
         return React.cloneElement(childrenWithContext, {
             index: this.props.index,
+
             ref: val => {
                 return (this.element = ReactDOM.findDOMNode(val));
             }

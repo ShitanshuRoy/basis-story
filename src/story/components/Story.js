@@ -11,11 +11,17 @@ export default class Story extends React.Component {
         this.state = {
             data: this.props.data,
             pickItem: null,
-            updater: false
+            updater: false,
+            pickIndex: null
         };
         this.pickColumn = null;
         this.pickItem = null;
     }
+    forceUpdate = () => {
+        this.setState({ pickIndex: null, pickItem: null });
+        this.pickColumn = null;
+        this.pickItem = null;
+    };
     getNestedIndex = (index, data) => {
         let flatIndex = index;
         let nestedIndex = 0;
@@ -24,7 +30,7 @@ export default class Story extends React.Component {
         let counter = 0;
         while (counter < data.length) {
             if (data[counter].length <= flatIndex) {
-                mainIndex = mainIndex + 1;
+                mainIndex++;
                 flatIndex = flatIndex - data[counter].length;
             } else {
                 nestedIndex = flatIndex;
@@ -43,11 +49,11 @@ export default class Story extends React.Component {
         if (data[itemIndex.columnIndex][itemIndex.itemIndex])
             return data[itemIndex.columnIndex][itemIndex.itemIndex];
         else {
-            console.log(index);
-            console.log(itemIndex);
+            // console.log(index);
+            // console.log(itemIndex);
             console.log("item not found");
-            //return null;
-            return data[itemIndex.columnIndex][itemIndex.itemIndex - 1];
+            return null;
+            //return data[itemIndex.columnIndex][itemIndex.itemIndex - 1];
         }
     };
     onDrag = val => {
@@ -71,8 +77,6 @@ export default class Story extends React.Component {
     //     }
     // };
     onPick = index => {
-        let flatIndex = 0;
-
         this.setState({ pickIndex: index });
     };
     onDrop = (index, direction, axis) => {
@@ -82,8 +86,14 @@ export default class Story extends React.Component {
         let flatIndex = 0;
         const droppedOnIndex = this.getNestedIndex(index, data);
         const pickedUpIndex = this.getNestedIndex(this.state.pickIndex, data);
-        const droppedOnItem = this.getNestedItem(index, data);
-        const pickedUpItem = this.getNestedItem(this.state.pickIndex, data);
+        const droppedOnItem = Object.assign(
+            {},
+            this.getNestedItem(index, data)
+        );
+        const pickedUpItem = Object.assign(
+            {},
+            this.getNestedItem(this.state.pickIndex, data)
+        );
 
         // console.log(this.state.pickIndex);
         // console.log(pickedUpIndex);
@@ -91,6 +101,10 @@ export default class Story extends React.Component {
         // console.log(index);
 
         if (direction === "INSIDE") {
+            console.log(this.state.data);
+            console.log(this.state.pickIndex);
+            console.log(pickedUpIndex);
+            console.log(droppedOnIndex);
             if (
                 pickedUpItem &&
                 droppedOnItem &&
@@ -109,8 +123,6 @@ export default class Story extends React.Component {
             }
         } else {
             if (axis === "Y") {
-                console.log(droppedOnItem);
-                console.log(pickedUpItem);
                 const normaliser = direction === "END" ? 1 : 0;
                 // console.log("drop column", droppedOnIndex.columnIndex);
                 // console.log(
@@ -120,21 +132,31 @@ export default class Story extends React.Component {
                 //         : 0
                 // );
                 // console.log("pick column", pickedUpIndex.columnIndex);
-                // console.log("pick item", pickedUpIndex.itemIndex);
-                data[droppedOnIndex.columnIndex].splice(
-                    droppedOnIndex.itemIndex + normaliser >= 0
-                        ? droppedOnIndex.itemIndex + normaliser
-                        : 0,
-                    0,
-                    pickedUpItem
-                );
-                data[pickedUpIndex.columnIndex].splice(
-                    pickedUpIndex.itemIndex,
-                    1
-                );
-                this.setState({ data, updater: !this.state.updater }, () => {
-                    this.forceUpdate();
-                });
+                // console.log("pick item", pickedUpIndex.itemIndex)
+                console.log(pickedUpItem);
+
+                const fillNormaliser = index < this.state.pickIndex ? 1 : 0;
+                if (pickedUpItem) {
+                    data[droppedOnIndex.columnIndex].splice(
+                        droppedOnIndex.itemIndex + normaliser >= 0
+                            ? droppedOnIndex.itemIndex + normaliser
+                            : 0,
+                        0,
+                        pickedUpItem
+                    );
+
+                    data[pickedUpIndex.columnIndex].splice(
+                        pickedUpIndex.itemIndex,
+                        1
+                    );
+
+                    this.setState(
+                        { data, updater: !this.state.updater },
+                        () => {
+                            this.forceUpdate();
+                        }
+                    );
+                }
             } else if (axis === "X") {
                 const normaliser = direction === "END" ? 1 : 0;
 
@@ -154,11 +176,14 @@ export default class Story extends React.Component {
                     this.forceUpdate();
                 });
                 console.log("X");
+            } else {
+                this.forceUpdate();
             }
         }
     };
 
     render() {
+        const pickIndex = this.state.pickIndex;
         const ratios = this.state.data.map(item => {
             return item
                 .map(val => {
@@ -190,36 +215,33 @@ export default class Story extends React.Component {
                                     ratio={ratios[index]}
                                 >
                                     {val.map((value, i) => {
+                                        const itemIndex =
+                                            index === 0
+                                                ? i
+                                                : this.state.data
+                                                      .slice(0, [index])
+                                                      .reduce((acc, curr) => {
+                                                          return (
+                                                              acc + curr.length
+                                                          );
+                                                      }, 0) + i;
                                         return (
                                             <Draggable
                                                 {...value}
-                                                index={
-                                                    index === 0
-                                                        ? i
-                                                        : this.state.data
-                                                              .slice(0, [index])
-                                                              .reduce(
-                                                                  (
-                                                                      acc,
-                                                                      curr
-                                                                  ) => {
-                                                                      return (
-                                                                          acc +
-                                                                          curr.length
-                                                                      );
-                                                                  },
-                                                                  0
-                                                              ) + i
-                                                }
+                                                index={itemIndex}
                                                 onPickUp={this.handlePick}
                                             >
                                                 {() => {
+                                                    const opacity =
+                                                        pickIndex === itemIndex
+                                                            ? 0.5
+                                                            : 1;
                                                     return (
                                                         <div
                                                             style={{
                                                                 width: "100%",
-                                                                height: "100%"
-
+                                                                height: "100%",
+                                                                opacity: opacity
                                                                 // backgroundImage: `url(${
                                                                 //     value.image
                                                                 // })`,
