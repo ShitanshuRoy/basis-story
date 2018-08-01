@@ -24,8 +24,6 @@ export default class Story extends React.Component {
         this.pickItem = null;
     };
     getNestedIndex = (index, data) => {
-        let flatIndex = index;
-        let index2 = index;
         let nestedIndex = 0;
         let mainIndex = 0;
         // console.log(index);
@@ -40,14 +38,14 @@ export default class Story extends React.Component {
 
         //     counter++;
         // }
-        let counter2 = 0;
+
         data.forEach((value, ix) => {
             value.forEach((val, ix2) => {
-                if (index2 === counter2) {
+                if (index === counter) {
                     mainIndex = ix;
                     nestedIndex = ix2;
                 }
-                counter2++;
+                counter++;
             });
         });
         // console.log(data);
@@ -62,11 +60,8 @@ export default class Story extends React.Component {
         if (data[itemIndex.columnIndex][itemIndex.itemIndex])
             return data[itemIndex.columnIndex][itemIndex.itemIndex];
         else {
-            // console.log(index);
-            // console.log(itemIndex);
             console.log("item not found");
             return null;
-            //return data[itemIndex.columnIndex][itemIndex.itemIndex - 1];
         }
     };
     onDrag = val => {
