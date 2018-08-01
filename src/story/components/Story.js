@@ -11,7 +11,7 @@ export default class Story extends React.Component {
         this.state = {
             data: this.props.data,
             pickItem: null,
-            updater: false,
+
             pickIndex: null
         };
         this.pickColumn = null;
@@ -19,28 +19,39 @@ export default class Story extends React.Component {
     }
     forceUpdate = () => {
         this.setState({ pickIndex: null, pickItem: null });
+
         this.pickColumn = null;
         this.pickItem = null;
     };
     getNestedIndex = (index, data) => {
-        let flatIndex = index;
         let nestedIndex = 0;
         let mainIndex = 0;
-
+        // console.log(index);
         let counter = 0;
-        while (counter < data.length) {
-            if (data[counter].length <= flatIndex) {
-                mainIndex++;
-                flatIndex = flatIndex - data[counter].length;
-            } else {
-                nestedIndex = flatIndex;
-            }
-            counter++;
-        }
-        console.log(data);
-        console.log("index", index);
-        console.log("mainindex", mainIndex);
-        console.log("nested index", nestedIndex);
+        // while (counter < data.length) {
+        //     if (data[counter].length <= flatIndex) {
+        //         flatIndex = flatIndex - data[counter].length;
+        //         mainIndex++;
+        //     }
+
+        //     nestedIndex = flatIndex;
+
+        //     counter++;
+        // }
+
+        data.forEach((value, ix) => {
+            value.forEach((val, ix2) => {
+                if (index === counter) {
+                    mainIndex = ix;
+                    nestedIndex = ix2;
+                }
+                counter++;
+            });
+        });
+        // console.log(data);
+        // console.log("index", index);
+        // console.log("mainindex", mainIndex);
+        // console.log("nested index", nestedIndex);
         return { columnIndex: mainIndex, itemIndex: nestedIndex };
     };
     getNestedItem = (index, data) => {
@@ -49,11 +60,8 @@ export default class Story extends React.Component {
         if (data[itemIndex.columnIndex][itemIndex.itemIndex])
             return data[itemIndex.columnIndex][itemIndex.itemIndex];
         else {
-            // console.log(index);
-            // console.log(itemIndex);
             console.log("item not found");
             return null;
-            //return data[itemIndex.columnIndex][itemIndex.itemIndex - 1];
         }
     };
     onDrag = val => {
@@ -82,7 +90,7 @@ export default class Story extends React.Component {
     onDrop = (index, direction, axis) => {
         let data = JSON.parse(JSON.stringify(this.state.data));
         //  this.setState({ dropItem: index });
-        console.log(direction);
+
         let flatIndex = 0;
         const droppedOnIndex = this.getNestedIndex(index, data);
         const pickedUpIndex = this.getNestedIndex(this.state.pickIndex, data);
@@ -95,8 +103,8 @@ export default class Story extends React.Component {
             this.getNestedItem(this.state.pickIndex, data)
         );
 
-        // console.log(this.state.pickIndex);
-        // console.log(pickedUpIndex);
+        console.log(this.state.pickIndex);
+        console.log(pickedUpIndex);
         // console.log(droppedOnIndex);
         // console.log(index);
 
@@ -117,7 +125,7 @@ export default class Story extends React.Component {
                 data[pickedUpIndex.columnIndex][
                     pickedUpIndex.itemIndex
                 ] = droppedOnItem;
-                this.setState({ data, updater: !this.state.updater }, () => {
+                this.setState({ data }, () => {
                     this.forceUpdate();
                 });
             }
@@ -131,10 +139,10 @@ export default class Story extends React.Component {
                 //         ? droppedOnIndex.itemIndex + normaliser
                 //         : 0
                 // );
-                // console.log("pick column", pickedUpIndex.columnIndex);
-                // console.log("pick item", pickedUpIndex.itemIndex)
-                console.log(pickedUpItem);
-
+                console.log("dropIndex", index);
+                console.log("pickIndex", this.state.pickIndex);
+                console.log("drop2", droppedOnIndex);
+                console.log("pick2", pickedUpIndex);
                 const fillNormaliser = index < this.state.pickIndex ? 1 : 0;
                 if (pickedUpItem) {
                     data[droppedOnIndex.columnIndex].splice(
@@ -150,12 +158,9 @@ export default class Story extends React.Component {
                         1
                     );
 
-                    this.setState(
-                        { data, updater: !this.state.updater },
-                        () => {
-                            this.forceUpdate();
-                        }
-                    );
+                    this.setState({ data }, () => {
+                        this.forceUpdate();
+                    });
                 }
             } else if (axis === "X") {
                 const normaliser = direction === "END" ? 1 : 0;
@@ -172,7 +177,7 @@ export default class Story extends React.Component {
                     1
                 );
                 console.log(data);
-                this.setState({ data, updater: !this.state.updater }, () => {
+                this.setState({ data }, () => {
                     this.forceUpdate();
                 });
                 console.log("X");
@@ -201,15 +206,15 @@ export default class Story extends React.Component {
 
         return (
             <DragDropMouse
-                updater={this.state.updater}
                 onPick={this.onPick}
                 onDrag={this.onDrag}
                 onDrop={this.onDrop}
                 render={dragDropMouse => (
-                    <ForcedLayout updater={this.state.updater}>
+                    <ForcedLayout>
                         {this.state.data.map((val, index) => {
                             return (
                                 <ResizableColumn
+                                    key={index}
                                     index={index}
                                     normaliser={normaliser}
                                     ratio={ratios[index]}
@@ -227,6 +232,7 @@ export default class Story extends React.Component {
                                                       }, 0) + i;
                                         return (
                                             <Draggable
+                                                key={i}
                                                 {...value}
                                                 index={itemIndex}
                                                 onPickUp={this.handlePick}
