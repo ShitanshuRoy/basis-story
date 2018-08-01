@@ -10,7 +10,9 @@ export default class DragDropMouse extends React.Component {
             draggedCoordinates: {},
             dropCoordinates: {},
             dragging: false,
-            getDraggable: this.getDraggable
+            getDraggable: this.getDraggable,
+            draggables: [],
+            stupidUpdater: false
         };
         this.draggables = [];
     }
@@ -173,16 +175,42 @@ export default class DragDropMouse extends React.Component {
     getDraggable = (val, i) => {
         if ((i && i !== undefined) || i === 0) {
             this.draggables[i] = val;
+            // this.setState(prevState => {
+            //     stupidUpdater: !prevState.stupidUpdater;
+            // });
+            //  this.setState({ draggables: this.draggables });
         }
 
         // this.draggables[i] = val;
     };
     render() {
-        //  console.log(this.draggables);
         return (
-            <DragDropContext.Provider value={this.getDraggable}>
-                {this.props.render(this.state)}
-            </DragDropContext.Provider>
+            <React.Fragment>
+                <DragDropContext.Provider
+                    value={this.getDraggable}
+                    stupidUpdater={this.state.stupidUpdater}
+                >
+                    {this.props.render(this.state)}
+                </DragDropContext.Provider>
+                <div>
+                    {" "}
+                    {this.draggables.map(val => {
+                        return (
+                            <div
+                                style={{
+                                    pointerEvents: "none",
+                                    width: val.xEnd - val.xStart,
+                                    height: val.yEnd - val.yStart,
+                                    position: "absolute",
+                                    left: val.xStart,
+                                    top: val.yStart,
+                                    border: "3px solid red"
+                                }}
+                            />
+                        );
+                    })}{" "}
+                </div>
+            </React.Fragment>
         );
     }
 }
@@ -202,11 +230,14 @@ class PositionUpdater extends React.Component {
     componentDidUpdate() {
         this.props.update(this.props.box, this.props.index);
     }
-    componentWillReceiveProps(nextProps) {
-        if (this.props.box !== nextProps.box) {
-            this.props.update(this.props.box, this.props.index);
-        }
-    }
+    // componentWillReceiveProps(nextProps) {
+    //     if (this.props.box !== nextProps.box) {
+    //         this.props.update(this.props.box, this.props.index);
+    //     }
+    // }
+    // componentDidUpdate() {
+    //     this.props.update(this.props.box, this.props.index);
+    // }
     render() {
         return <React.Fragment>{this.props.children}</React.Fragment>;
     }

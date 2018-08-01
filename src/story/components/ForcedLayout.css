@@ -40,7 +40,7 @@
 .ForcedLayout-column{
   display:inline-block;
   vertical-align:top;
-  transition:150ms;
+  /* transition:150ms; */
 }
 .ForcedLayout-column-left{
   display:inline-block;
