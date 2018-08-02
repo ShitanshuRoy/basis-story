@@ -74,56 +74,56 @@ export default class DragDropMouse extends React.Component {
         if (this.draggables && this.draggables.length > 0) {
             this.draggables.forEach((offset, i) => {
                 // console.log(offset);
-                if (
-                    this.checkIfInside(
-                        this.state.dropCoordinates.x,
-                        offset.xStart,
-                        offset.xEnd
-                    ) &&
-                    this.checkIfInside(
-                        this.state.dropCoordinates.y,
-                        offset.yStart,
-                        offset.yEnd
-                    )
-                ) {
-                    if (this.props.onDrop) {
-                        if (
+                // if (
+                //     this.checkIfInside(
+                //         this.state.dropCoordinates.x,
+                //         offset.xStart,
+                //         offset.xEnd
+                //     ) &&
+                //     this.checkIfInside(
+                //         this.state.dropCoordinates.y,
+                //         offset.yStart,
+                //         offset.yEnd
+                //     )
+                // ) {
+                if (this.props.onDrop) {
+                    if (
+                        this.checkThreshold(
+                            this.state.dropCoordinates.x,
+                            offset.xStart,
+                            offset.xEnd
+                        )
+                    ) {
+                        this.props.onDrop(
+                            i,
                             this.checkThreshold(
                                 this.state.dropCoordinates.x,
                                 offset.xStart,
                                 offset.xEnd
-                            )
-                        ) {
-                            this.props.onDrop(
-                                i,
-                                this.checkThreshold(
-                                    this.state.dropCoordinates.x,
-                                    offset.xStart,
-                                    offset.xEnd
-                                ),
-                                "X"
-                            );
-                        } else if (
+                            ),
+                            "X"
+                        );
+                    } else if (
+                        this.checkThreshold(
+                            this.state.dropCoordinates.y,
+                            offset.yStart,
+                            offset.yEnd
+                        )
+                    ) {
+                        this.props.onDrop(
+                            i,
                             this.checkThreshold(
                                 this.state.dropCoordinates.y,
                                 offset.yStart,
                                 offset.yEnd
-                            )
-                        ) {
-                            this.props.onDrop(
-                                i,
-                                this.checkThreshold(
-                                    this.state.dropCoordinates.y,
-                                    offset.yStart,
-                                    offset.yEnd
-                                ),
-                                "Y"
-                            );
-                        } else {
-                            this.props.onDrop(i, "INSIDE");
-                        }
+                            ),
+                            "Y"
+                        );
+                    } else {
+                        this.props.onDrop(i, "INSIDE");
                     }
                 }
+                // }
             });
         }
     };

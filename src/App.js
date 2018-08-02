@@ -12,72 +12,86 @@ const data = [
         {
             image:
                 "http://ultimateclassicrock.com/files/2011/06/Killers625.jpg?w=980&q=75",
-            ratio: 1
+            ratio: 1,
+            index: 0
         },
         {
             image: "http://ultimateclassicrock.com/files/2011/06/mind625.jpg",
-            ratio: 1
+            ratio: 1,
+            index: 1
         },
         {
             image: "https://i.ytimg.com/vi/ikQd8EbwN8g/hqdefault.jpg",
-            ratio: 1
+            ratio: 1,
+            index: 2
         }
     ],
     [
         {
             image:
                 "https://i.pinimg.com/736x/e8/09/a4/e809a47a8c3988ff5074861ba62ec52e--iron-maiden-album-covers-iron-maiden-eddie.jpg",
-            ratio: 1
+            ratio: 1,
+            index: 3
         },
 
         {
             image: "https://usercontent1.hubstatic.com/12321410_f520.jpg",
-            ratio: 1
+            ratio: 1,
+            index: 4
         },
         {
             image:
                 "https://uproxx.files.wordpress.com/2015/09/iron-maiden-somewhere-in-time-1986.jpg?quality=95&w=650",
-            ratio: 1
+            ratio: 1,
+            index: 5
         },
         {
             image: "http://ultimateclassicrock.com/files/2011/06/7.jpg",
-            ratio: 1
+            ratio: 1,
+            index: 6
         }
     ],
     [
         {
             image:
                 "https://e.snmc.io/lk/l/l/6ca3a30dd246788ebebbfacd6f8b0f15/2713646.jpg",
-            ratio: 1
+            ratio: 1,
+            index: 7
         },
         {
             image: "http://ultimateclassicrock.com/files/2011/06/LIVE625.jpg",
-            ratio: 1
+            ratio: 1,
+            index: 8
         },
         {
             image:
                 "https://i.pinimg.com/736x/37/57/d0/3757d0b3b268e54004db7605652c6433--iron-maiden-album-covers-iron-maiden-eddie.jpg",
-            ratio: 1
+            ratio: 1,
+            index: 9
         },
         {
             image:
                 "http://bh-s2.azureedge.net/bh-uploads/2015/10/Iron_Maiden-750x750.gif",
-            ratio: 1
+            ratio: 1,
+            index: 10
         }
     ],
     [
         {
             image: "https://usercontent1.hubstatic.com/12321308_f520.jpg",
-            ratio: 1
+            ratio: 1,
+            index: 11
         },
         {
             image:
                 "https://images.genius.com/f9b6af607494cb7ce8af3c63843daca4.1000x1000x1.jpg",
-            ratio: 1
+            ratio: 1,
+            index: 12
         },
         {
             image: "https://usercontent2.hubstatic.com/12321317_f520.jpg",
-            ratio: 1
+            ratio: 1,
+            index: 13
         }
     ]
 ];

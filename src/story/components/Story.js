@@ -52,7 +52,7 @@ export default class Story extends React.Component {
         if (data[itemIndex.columnIndex][itemIndex.itemIndex])
             return data[itemIndex.columnIndex][itemIndex.itemIndex];
         else {
-            console.log("item not found");
+            // console.log("item not found");
             return null;
         }
     };
@@ -75,8 +75,9 @@ export default class Story extends React.Component {
             {},
             this.getNestedItem(this.state.pickIndex, data)
         );
-
-        if (direction === "INSIDE") {
+        // console.log(this.state.dragAxis);
+        if (this.state.dragDirection === "INSIDE") {
+            // console.log("inside");
             if (
                 pickedUpItem &&
                 droppedOnItem &&
@@ -94,31 +95,81 @@ export default class Story extends React.Component {
                 });
             }
         } else {
-            if (axis === "Y") {
-                const normaliser = direction === "END" ? 1 : 0;
+            if (this.state.dragAxis === "Y") {
+                //  const normaliser = direction === "END" ? 1 : 0;
 
                 const fillNormaliser = index < this.state.pickIndex ? 1 : 0;
+                // if (pickedUpItem) {
+                //     if (
+                //         droppedOnIndex.columnIndex ===
+                //             pickedUpIndex.columnIndex &&
+                //         droppedOnIndex.itemIndex < pickedUpIndex.itemIndex
+                //     ) {
+                //         data[pickedUpIndex.columnIndex].splice(
+                //             pickedUpIndex.itemIndex,
+                //             1
+                //         );
+                //         data[droppedOnIndex.columnIndex].splice(
+                //             droppedOnIndex.itemIndex + normaliser >= 0
+                //                 ? droppedOnIndex.itemIndex + normaliser
+                //                 : 0,
+                //             0,
+                //             pickedUpItem
+                //         );
+                //     } else {
+                //         data[droppedOnIndex.columnIndex].splice(
+                //             droppedOnIndex.itemIndex + normaliser >= 0
+                //                 ? droppedOnIndex.itemIndex + normaliser
+                //                 : 0,
+                //             0,
+                //             pickedUpItem
+                //         );
+
+                //         data[pickedUpIndex.columnIndex].splice(
+                //             pickedUpIndex.itemIndex,
+                //             1
+                //         );
+                //     }
+
+                //     const noEmptyColumns = data.filter(val => {
+                //         return val.length > 0;
+                //     });
+                //     this.setState({ data: noEmptyColumns }, () => {
+                //         this.forceUpdate();
+                //     });
+                // }
+                const normaliser = this.state.dragDirection === "END" ? 1 : 0;
+
                 if (pickedUpItem) {
                     if (
-                        droppedOnIndex.columnIndex ===
+                        this.state.dragOverColumn ===
                             pickedUpIndex.columnIndex &&
-                        droppedOnIndex.itemIndex < pickedUpIndex.itemIndex
+                        this.state.dragOverItem < pickedUpIndex.itemIndex
                     ) {
                         data[pickedUpIndex.columnIndex].splice(
                             pickedUpIndex.itemIndex,
                             1
                         );
-                        data[droppedOnIndex.columnIndex].splice(
-                            droppedOnIndex.itemIndex + normaliser >= 0
-                                ? droppedOnIndex.itemIndex + normaliser
+                        data[this.state.dragOverColumn].splice(
+                            this.state.dragOverItem + normaliser >= 0
+                                ? this.state.dragOverItem + normaliser
                                 : 0,
                             0,
                             pickedUpItem
                         );
                     } else {
-                        data[droppedOnIndex.columnIndex].splice(
-                            droppedOnIndex.itemIndex + normaliser >= 0
-                                ? droppedOnIndex.itemIndex + normaliser
+                        // console.log(
+                        //     "dragged over column",
+                        //     this.state.dragOverColumn
+                        // );
+                        // console.log(
+                        //     "dragged over item",
+                        //     this.state.dragOverItem + normaliser
+                        // );
+
+                        data[this.state.dragOverColumn].splice(
+                            this.state.dragOverItem + normaliser >= 0
+                                ? this.state.dragOverItem + normaliser
                                 : 0,
                             0,
                             pickedUpItem
@@ -133,6 +184,7 @@ export default class Story extends React.Component {
                     const noEmptyColumns = data.filter(val => {
                         return val.length > 0;
                     });
+
                     this.setState({ data: noEmptyColumns }, () => {
                         this.forceUpdate();
                     });
@@ -259,7 +311,7 @@ export default class Story extends React.Component {
                                             this.state.dragOverColumn === index
                                                 ? this.state.dragOverItem
                                                 : null;
-                                        console.log(yShiftDivider);
+
                                         //    console.log();
                                         // console.log("Column", this.state.dragOverColumn);
                                         // console.log("Item", this.state.dragOverItem);
@@ -271,10 +323,14 @@ export default class Story extends React.Component {
                                         //         : 20
                                         //     : 0;
                                         let shiftAmount = 0;
-                                        if (yShiftDivider) {
+                                        if (
+                                            yShiftDivider ||
+                                            yShiftDivider === 0
+                                        ) {
                                             if (yShiftDivider > i) {
                                                 shiftAmount = -20;
                                             }
+                                            // console.log()
                                             if (yShiftDivider === i) {
                                                 if (
                                                     this.state.dragDirection ===
