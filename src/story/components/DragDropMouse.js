@@ -10,9 +10,7 @@ export default class DragDropMouse extends React.Component {
             draggedCoordinates: {},
             dropCoordinates: {},
             dragging: false,
-            getDraggable: this.getDraggable,
-            draggables: [],
-            stupidUpdater: false
+            getDraggable: this.getDraggable
         };
         this.draggables = [];
     }
@@ -129,12 +127,71 @@ export default class DragDropMouse extends React.Component {
             });
         }
     };
+
+    drag = () => {
+        if (this.draggables && this.draggables.length > 0) {
+            this.draggables.forEach((offset, i) => {
+                // console.log(offset);
+                if (
+                    this.checkIfInside(
+                        this.state.mouseCoordinates.x,
+                        offset.xStart,
+                        offset.xEnd
+                    ) &&
+                    this.checkIfInside(
+                        this.state.mouseCoordinates.y,
+                        offset.yStart,
+                        offset.yEnd
+                    )
+                ) {
+                    if (this.props.onDrag) {
+                        if (
+                            this.checkThreshold(
+                                this.state.mouseCoordinates.x,
+                                offset.xStart,
+                                offset.xEnd
+                            )
+                        ) {
+                            this.props.onDrag(
+                                i,
+                                this.checkThreshold(
+                                    this.state.mouseCoordinates.x,
+                                    offset.xStart,
+                                    offset.xEnd
+                                ),
+                                "X"
+                            );
+                        } else if (
+                            this.checkThreshold(
+                                this.state.mouseCoordinates.y,
+                                offset.yStart,
+                                offset.yEnd
+                            )
+                        ) {
+                            this.props.onDrag(
+                                i,
+                                this.checkThreshold(
+                                    this.state.mouseCoordinates.y,
+                                    offset.yStart,
+                                    offset.yEnd
+                                ),
+                                "Y"
+                            );
+                        } else {
+                            this.props.onDrag(i, "INSIDE");
+                        }
+                    }
+                }
+            });
+        }
+    };
     handleMouseMove(event) {
         if (this.state.dragging) {
             const mouseCoordinates = { x: event.pageX, y: event.pageY };
             this.setState({ mouseCoordinates }, () => {
-                if (this.props.dragging && this.props.onDrag) {
-                    this.props.onDrag(this.state.mouseCoordinates);
+                if (this.state.dragging && this.props.onDrag) {
+                    // this.props.onDrag(this.state.mouseCoordinates);
+                    this.drag();
                 }
             });
         }
@@ -175,13 +232,7 @@ export default class DragDropMouse extends React.Component {
     getDraggable = (val, i) => {
         if ((i && i !== undefined) || i === 0) {
             this.draggables[i] = val;
-            // this.setState(prevState => {
-            //     stupidUpdater: !prevState.stupidUpdater;
-            // });
-            //  this.setState({ draggables: this.draggables });
         }
-
-        // this.draggables[i] = val;
     };
     render() {
         return (
