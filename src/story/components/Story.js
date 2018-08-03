@@ -15,8 +15,6 @@ export default class Story extends React.Component {
             dragOverColumn: null,
             dragOverItem: null
         };
-        this.pickColumn = null;
-        this.pickItem = null;
     }
     forceUpdate = () => {
         this.setState({
@@ -25,9 +23,6 @@ export default class Story extends React.Component {
             dragOverColumn: null,
             dragOverItem: null
         });
-
-        this.pickColumn = null;
-        this.pickItem = null;
     };
     getNestedIndex = (index, data) => {
         let nestedIndex = 0;
@@ -43,7 +38,6 @@ export default class Story extends React.Component {
                 counter++;
             });
         });
-
         return { columnIndex: mainIndex, itemIndex: nestedIndex };
     };
     getNestedItem = (index, data) => {
@@ -63,14 +57,16 @@ export default class Story extends React.Component {
         let data = JSON.parse(JSON.stringify(this.state.data));
         //  this.setState({ dropItem: index });
 
-        const droppedOnIndex = this.getNestedIndex(index, data);
+        //const droppedOnIndex = this.getNestedIndex(index, data);
         // dragOverColumn: null,
         // dragOverItem: null
         const pickedUpIndex = this.getNestedIndex(this.state.pickIndex, data);
-        const droppedOnItem = Object.assign(
-            {},
-            this.getNestedItem(index, data)
-        );
+        // const droppedOnItem = Object.assign(
+        //     {},
+        //     this.getNestedItem(index, data)
+        // );
+        const droppedOnItem =
+            data[this.state.dragOverColumn][this.state.dragOverItem];
         const pickedUpItem = Object.assign(
             {},
             this.getNestedItem(this.state.pickIndex, data)
@@ -78,14 +74,15 @@ export default class Story extends React.Component {
         // console.log(this.state.dragAxis);
         if (this.state.dragDirection === "INSIDE") {
             // console.log("inside");
+
             if (
                 pickedUpItem &&
                 droppedOnItem &&
                 pickedUpItem !== undefined &&
                 droppedOnItem !== undefined
             ) {
-                data[droppedOnIndex.columnIndex][
-                    droppedOnIndex.itemIndex
+                data[this.state.dragOverColumn][
+                    this.state.dragOverItem
                 ] = pickedUpItem;
                 data[pickedUpIndex.columnIndex][
                     pickedUpIndex.itemIndex
@@ -99,45 +96,7 @@ export default class Story extends React.Component {
                 //  const normaliser = direction === "END" ? 1 : 0;
 
                 const fillNormaliser = index < this.state.pickIndex ? 1 : 0;
-                // if (pickedUpItem) {
-                //     if (
-                //         droppedOnIndex.columnIndex ===
-                //             pickedUpIndex.columnIndex &&
-                //         droppedOnIndex.itemIndex < pickedUpIndex.itemIndex
-                //     ) {
-                //         data[pickedUpIndex.columnIndex].splice(
-                //             pickedUpIndex.itemIndex,
-                //             1
-                //         );
-                //         data[droppedOnIndex.columnIndex].splice(
-                //             droppedOnIndex.itemIndex + normaliser >= 0
-                //                 ? droppedOnIndex.itemIndex + normaliser
-                //                 : 0,
-                //             0,
-                //             pickedUpItem
-                //         );
-                //     } else {
-                //         data[droppedOnIndex.columnIndex].splice(
-                //             droppedOnIndex.itemIndex + normaliser >= 0
-                //                 ? droppedOnIndex.itemIndex + normaliser
-                //                 : 0,
-                //             0,
-                //             pickedUpItem
-                //         );
 
-                //         data[pickedUpIndex.columnIndex].splice(
-                //             pickedUpIndex.itemIndex,
-                //             1
-                //         );
-                //     }
-
-                //     const noEmptyColumns = data.filter(val => {
-                //         return val.length > 0;
-                //     });
-                //     this.setState({ data: noEmptyColumns }, () => {
-                //         this.forceUpdate();
-                //     });
-                // }
                 const normaliser = this.state.dragDirection === "END" ? 1 : 0;
 
                 if (pickedUpItem) {
@@ -189,19 +148,20 @@ export default class Story extends React.Component {
                         this.forceUpdate();
                     });
                 }
-            } else if (axis === "X") {
-                const normaliser = direction === "END" ? 1 : 0;
+            } else if (this.state.dragAxis === "X") {
+                const normaliser = this.state.dragDirection === "END" ? 1 : 0;
 
-                data.splice(
-                    droppedOnIndex.columnIndex + normaliser >= 0
-                        ? droppedOnIndex.columnIndex + normaliser
-                        : 0,
-                    0,
-                    [pickedUpItem]
-                );
                 data[pickedUpIndex.columnIndex].splice(
                     pickedUpIndex.itemIndex,
                     1
+                );
+
+                data.splice(
+                    this.state.dragOverColumn + normaliser >= 0
+                        ? this.state.dragOverColumn + normaliser
+                        : 0,
+                    0,
+                    [pickedUpItem]
                 );
 
                 const noEmptyColumns = data.filter(val => {
@@ -221,7 +181,7 @@ export default class Story extends React.Component {
         const data = this.state.data;
         const dragIndex = this.getNestedIndex(index, data);
         // console.log("dragIndex", dragIndex);
-        const normaliser = direction === "END" ? 1 : 0;
+
         this.setState({
             dragOverColumn: dragIndex.columnIndex,
             dragOverItem: dragIndex.itemIndex,
@@ -282,12 +242,45 @@ export default class Story extends React.Component {
                 render={dragDropMouse => (
                     <ForcedLayout>
                         {this.state.data.map((val, index) => {
+                            const xShiftDivider =
+                                this.state.dragAxis === "X"
+                                    ? this.state.dragOverColumn
+                                    : null;
+                            // console.log("dragAxis", this.state.dragAxis);
+                            // console.log(
+                            //     "drag column",
+                            //     this.state.dragOverColumn
+                            // );
+                            // console.log("current column", index);
+                            // console.log("xShift", xShiftDivider);
+                            let shiftDirectionColumn = null;
+
+                            if (xShiftDivider || xShiftDivider === 0) {
+                                if (xShiftDivider > index) {
+                                    shiftDirectionColumn = "LEFT";
+                                }
+                                // console.log()
+                                if (xShiftDivider === index) {
+                                    if (this.state.dragDirection === "START") {
+                                        shiftDirectionColumn = "RIGHT";
+                                    } else if (
+                                        this.state.dragDirection === "END"
+                                    ) {
+                                        shiftDirectionColumn = "LEFT";
+                                    }
+                                }
+                                if (xShiftDivider < index) {
+                                    shiftDirectionColumn = "RIGHT";
+                                }
+                            }
+
                             return (
                                 <ResizableColumn
                                     key={index}
                                     index={index}
                                     normaliser={normaliser}
                                     ratio={ratios[index]}
+                                    shiftDirection={shiftDirectionColumn}
                                 >
                                     {val.map((value, i) => {
                                         const itemIndex =
@@ -322,13 +315,14 @@ export default class Story extends React.Component {
                                         //         ? -20
                                         //         : 20
                                         //     : 0;
-                                        let shiftAmount = 0;
+
+                                        let shiftDirection = null;
                                         if (
                                             yShiftDivider ||
                                             yShiftDivider === 0
                                         ) {
                                             if (yShiftDivider > i) {
-                                                shiftAmount = -20;
+                                                shiftDirection = "UP";
                                             }
                                             // console.log()
                                             if (yShiftDivider === i) {
@@ -336,16 +330,16 @@ export default class Story extends React.Component {
                                                     this.state.dragDirection ===
                                                     "START"
                                                 ) {
-                                                    shiftAmount = 20;
+                                                    shiftDirection = "DOWN";
                                                 } else if (
                                                     this.state.dragDirection ===
                                                     "END"
                                                 ) {
-                                                    shiftAmount = -20;
+                                                    shiftDirection = "UP";
                                                 }
                                             }
                                             if (yShiftDivider < i) {
-                                                shiftAmount = 20;
+                                                shiftDirection = "DOWN";
                                             }
                                         }
 
@@ -355,6 +349,7 @@ export default class Story extends React.Component {
                                                 {...value}
                                                 index={itemIndex}
                                                 onPickUp={this.handlePick}
+                                                shiftDirection={shiftDirection}
                                             >
                                                 {() => {
                                                     const opacity =
@@ -368,17 +363,10 @@ export default class Story extends React.Component {
                                                                 height: "100%",
                                                                 opacity: opacity,
                                                                 position:
-                                                                    "relative",
-                                                                transform: `translateY(${shiftAmount}px)`,
-                                                                transition:
-                                                                    "200ms"
-                                                                // backgroundImage: `url(${
-                                                                //     value.image
-                                                                // })`,
-                                                                // backgroundPosition:
-                                                                //     "center",
-                                                                // backgroundSize:
-                                                                //     "cover"
+                                                                    "relative"
+                                                                // transform: `translateY(${shiftAmount}px)`,
+                                                                // transition:
+                                                                //     "200ms"
                                                             }}
                                                         >
                                                             <Image

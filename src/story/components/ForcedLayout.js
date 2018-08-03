@@ -38,6 +38,11 @@ export class ResizableItem extends React.Component {
         //         );
         //     }
         // }
+        if (this.props.shiftDirection === "UP") {
+            className = "ForcedLayout-item-top";
+        } else if (this.props.shiftDirection === "DOWN") {
+            className = "ForcedLayout-item-bottom";
+        }
 
         return (
             <div
@@ -65,6 +70,12 @@ export class ResizableColumn extends React.Component {
         // } else if (this.checkThreshold(this.props.dragX, "X") === "END") {
         //     className = "ForcedLayout-column-right";
         // }
+        //  console.log(this.props.shiftDirection);
+        if (this.props.shiftDirection === "LEFT") {
+            className = "ForcedLayout-column-left";
+        } else if (this.props.shiftDirection === "RIGHT") {
+            className = "ForcedLayout-column-right";
+        }
 
         return (
             <div

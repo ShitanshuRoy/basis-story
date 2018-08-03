@@ -243,8 +243,7 @@ export default class DragDropMouse extends React.Component {
                 >
                     {this.props.render(this.state)}
                 </DragDropContext.Provider>
-                <div>
-                    {" "}
+                {/* <div>
                     {this.draggables.map(val => {
                         return (
                             <div
@@ -259,8 +258,8 @@ export default class DragDropMouse extends React.Component {
                                 }}
                             />
                         );
-                    })}{" "}
-                </div>
+                    })}
+                </div> */}
             </React.Fragment>
         );
     }
