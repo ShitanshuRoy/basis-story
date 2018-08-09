@@ -14,21 +14,21 @@
   width:100%;
   height:auto;
   position:relative;
-  /* transition:150ms; */
+  transition:150ms;
   opacity:0.6;
 }
 .ForcedLayout-item-top{
   width:100%;
   height:auto;
   position:relative;
-  /* transition:150ms; */
+  transition:150ms;
   transform:translateY(-15px);
 }
 .ForcedLayout-item-bottom{
   width:100%;
   height:auto;
   position:relative;
-  /* transition:150ms; */
+  transition:150ms;
   transform:translateY(15px);
 }
 .ForcedLayout-itemContent{
@@ -40,19 +40,19 @@
 .ForcedLayout-column{
   display:inline-block;
   vertical-align:top;
-  /* transition:150ms; */
+  transition:150ms;
 }
 .ForcedLayout-column-left{
   display:inline-block;
   vertical-align:top;
   transform:translateX(-15px);
-  /* transition:150ms; */
+  transition:150ms;
 
 }
 .ForcedLayout-column-right{
   display:inline-block;
   vertical-align:top;
   transform:translateX(15px);
-  /* transition:150ms; */
+  transition:150ms;
 
 }
